@@ -18,5 +18,6 @@
         public DateTime? DeletedAt { get; set; }
         public int? DeletedBy { get; set; }
         public ICollection<Client> Clients { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }

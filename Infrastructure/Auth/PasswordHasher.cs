@@ -1,6 +1,6 @@
-﻿using Application.Abstraction;
+﻿using Application.Auth;
 
-namespace Infrastructure.Abstraction
+namespace Infrastructure.Auth
 {
     public class PasswordHasher : IPasswordHasher
     {

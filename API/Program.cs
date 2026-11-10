@@ -1,8 +1,7 @@
-using Application.Abstraction;
 using Application.Auth;
 using Application.Repositories;
+using Application.Users;
 using Infrastructure;
-using Infrastructure.Abstraction;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -14,11 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
 builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
-builder.Services.AddScoped(typeof(IPasswordHasher), typeof(PasswordHasher));
+builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 
 var jwt = builder.Configuration.GetSection("jwt");
 
@@ -71,6 +72,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Application.Auth.DTOs;
 
 namespace Application.Auth
 {
     public interface IAuthService
     {
+        Task<LoginOutput> Login(LoginInput input);
+        Task<RefreshTokenOutput> RefreshToken(string token);
     }
 }
