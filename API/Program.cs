@@ -1,5 +1,6 @@
 using Application.Auth;
 using Application.Repositories;
+using Application.Roles;
 using Application.Users;
 using Infrastructure;
 using Infrastructure.Repositories;
@@ -20,6 +21,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
 builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
+builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService ));
 
 var jwt = builder.Configuration.GetSection("jwt");
 

@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs;
+using Application.Users.DTOs;
+using Domain.Entities;
 
 namespace Application.Repositories
 {
@@ -6,5 +8,6 @@ namespace Application.Repositories
     {
         public Task<User> GetByEmailWithRoleAsync(string email);
         public Task<User> GetByIdWithRole(int id);
+        public Task<PaginationOutput<User>> GetUserPagination(FilterInput input);
     }
 }
