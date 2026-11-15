@@ -6,8 +6,7 @@
         public string Email { get;}
         public string Name { get;}
         public string PhoneNumber { get;}
-        public int RoleId { get;}
-        public string RoleName { get;}
+        public string Role { get;}
         public int TenantId { get;}
     }
 }

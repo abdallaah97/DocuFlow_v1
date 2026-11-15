@@ -1,5 +1,7 @@
 ﻿using Application.Auth;
+using Application.Files;
 using Infrastructure.Auth;
+using Infrastructure.Files;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +19,7 @@ namespace Infrastructure
             services.AddScoped(typeof(IPasswordHasher), typeof(PasswordHasher));
             services.AddScoped(typeof(IJwtTokenService), typeof(JwtTokenService));
             services.AddScoped(typeof(ICurrentUser), typeof(CurrentUser));
+            services.AddScoped(typeof(IFileStorage), typeof(LocalFileStorage));
 
             return services;
         }

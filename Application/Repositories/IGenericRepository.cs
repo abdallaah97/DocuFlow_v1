@@ -9,7 +9,7 @@ namespace Application.Repositories
         Task<T> GetById(int id);
         Task<int> Count();
         Task<bool> Any(Expression<Func<T, bool>> predicate);
-        Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate);
+        Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate, bool ignoreQueryFilters = false);
         Task Insert(T entity);
         Task InsertRange(IEnumerable<T> entities);
         void Update(T entity);

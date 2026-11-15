@@ -1,10 +1,13 @@
 using Application.Auth;
+using Application.Clients;
 using Application.Repositories;
+using Application.Requests;
 using Application.Roles;
 using Application.Users;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -19,9 +22,20 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
+builder.Services.AddScoped(typeof(IClientRepository), typeof(ClientRepository));
+builder.Services.AddScoped(typeof(IRequestRepository), typeof(RequestRepository));
+builder.Services.AddScoped(typeof(IAccessLinkRepository), typeof(AccessLinkRepository));
 builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService ));
+builder.Services.AddScoped(typeof(IClientService), typeof(ClientService));
+builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
+
+// Allow uploads up to MaxFilesCount * MaxFileSizeMB (Kestrel's default body limit is ~30 MB)
+var maxUploadBytes = (builder.Configuration.GetValue<long>("Attachments:MaxFilesCount")
+    * builder.Configuration.GetValue<long>("Attachments:MaxFileSizeMB") + 1) * 1024 * 1024;
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = maxUploadBytes);
+builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = maxUploadBytes);
 
 var jwt = builder.Configuration.GetSection("jwt");
 

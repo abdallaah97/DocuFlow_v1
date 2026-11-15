@@ -41,8 +41,13 @@ namespace Infrastructure.Repositories
             return await _dbSet.AnyAsync(predicate);
         }
 
-        public async Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate)
+        public async Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate, bool ignoreQueryFilters = false)
         {
+            if (ignoreQueryFilters)
+            {
+                return await _dbSet.IgnoreQueryFilters().FirstOrDefaultAsync(predicate);
+            }
+
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
 
