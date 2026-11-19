@@ -39,6 +39,11 @@ namespace Infrastructure.Repositories
                 query = query.Where(x => x.Client.AssignedEmployeeId == employeeId);
             }
 
+            if (input.Status.HasValue)
+            {
+                query = query.Where(x => x.Status == input.Status);
+            }
+
             if (!string.IsNullOrEmpty(input.Search))
             {
                 var search = input.Search.ToLower().Trim();

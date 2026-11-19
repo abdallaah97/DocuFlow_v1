@@ -8,7 +8,8 @@ namespace Application.Requests
     {
         public Task CreateRequest(SaveRequestInput input);
         public Task<GetDocumentRequestDetailsOutput> GetDocumentRequestDetails(string token);
-        public Task UploadAttachments(string token, int itemId, List<UploadFileInput> files);
+        public Task UploadAttachments(string token, int itemId, UploadFileInput file);
         Task<PaginationOutput<DocumentListOutput>> GetDocumentRequestPagination(RequestFilterInput input);
+        Task UpdateRequestItemStatus(UpdateRequestItemStatusInput input);
     }
 }

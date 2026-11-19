@@ -53,15 +53,15 @@ namespace API.Controllers
         {
             try
             {
-                var files = (input.Files ?? new List<IFormFile>()).Select(f => new UploadFileInput
+                var file = new UploadFileInput
                 {
-                    FileName = f.FileName,
-                    ContentType = f.ContentType,
-                    Length = f.Length,
-                    Content = f.OpenReadStream()
-                }).ToList();
+                    FileName = input.File.FileName,
+                    ContentType = input.File.ContentType,
+                    Length = input.File.Length,
+                    Content = input.File.OpenReadStream()
+                };
 
-                await _requestService.UploadAttachments(input.Token, input.ItemId, files);
+                await _requestService.UploadAttachments(input.Token, input.ItemId, file);
                 return Ok();
             }
             catch (Exception ex)
@@ -83,6 +83,21 @@ namespace API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }   
+        }
+
+        [Authorize(Roles = RoleNames.Employee)]
+        [HttpPost("UpdateRequestItemStatus")]
+        public async Task<IActionResult> UpdateRequestItemStatus([FromBody] UpdateRequestItemStatusInput input)
+        {
+            try
+            {
+                await _requestService.UpdateRequestItemStatus(input);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

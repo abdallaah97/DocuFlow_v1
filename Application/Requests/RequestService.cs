@@ -95,7 +95,7 @@ namespace Application.Requests
             };
         }
 
-        public async Task UploadAttachments(string token, int itemId, List<UploadFileInput> files)
+        public async Task UploadAttachments(string token, int itemId, UploadFileInput file)
         {
             var accessLink = await _accessLinkRepository.GetByTokenWithItems(token);
             if (accessLink == null || !(accessLink.IsActive && accessLink.ExpiryDate.Date >= DateTime.UtcNow.Date))
@@ -115,7 +115,7 @@ namespace Application.Requests
                 throw new Exception("This item is already approved");
             }
 
-            ValidateFiles(files);
+            ValidateFiles(file);
 
             var folder = $"{item.TenantId}/{item.Id}";
             var oldPaths = SplitFileUrl(item.FileUrl);
@@ -123,11 +123,8 @@ namespace Application.Requests
 
             try
             {
-                foreach (var file in files)
-                {
-                    var path = await _fileStorage.Save(file.Content, folder, Path.GetExtension(file.FileName).ToLower());
-                    savedPaths.Add(path);
-                }
+                var path = await _fileStorage.Save(file.Content, folder, Path.GetExtension(file.FileName).ToLower());
+                savedPaths.Add(path);
 
                 var fileUrl = string.Join(FileUrlSeparator, savedPaths);
                 if (fileUrl.Length > FileUrlMaxLength)
@@ -172,39 +169,30 @@ namespace Application.Requests
                 : fileUrl.Split(FileUrlSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
-        private void ValidateFiles(List<UploadFileInput> files)
+        private void ValidateFiles(UploadFileInput file)
         {
-            if (files == null || files.Count == 0)
+            if (file == null)
             {
-                throw new Exception("No files uploaded");
-            }
-
-            var maxFilesCount = int.Parse(_configuration["Attachments:MaxFilesCount"]);
-            if (files.Count > maxFilesCount)
-            {
-                throw new Exception($"You can upload up to {maxFilesCount} files");
+                throw new Exception("No file uploaded");
             }
 
             var maxFileSize = long.Parse(_configuration["Attachments:MaxFileSizeMB"]) * 1024 * 1024;
             var allowedExtensions = _configuration.GetSection("Attachments:AllowedExtensions")
                 .GetChildren().Select(x => x.Value.ToLower()).ToList();
 
-            foreach (var file in files)
+            if (file.Length == 0)
             {
-                if (file.Length == 0)
-                {
-                    throw new Exception($"File {file.FileName} is empty");
-                }
+                throw new Exception($"File {file.FileName} is empty");
+            }
 
-                if (file.Length > maxFileSize)
-                {
-                    throw new Exception($"File {file.FileName} exceeds {_configuration["Attachments:MaxFileSizeMB"]} MB");
-                }
+            if (file.Length > maxFileSize)
+            {
+                throw new Exception($"File {file.FileName} exceeds {_configuration["Attachments:MaxFileSizeMB"]} MB");
+            }
 
-                if (!allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
-                {
-                    throw new Exception($"File type of {file.FileName} is not allowed");
-                }
+            if (!allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
+            {
+                throw new Exception($"File type of {file.FileName} is not allowed");
             }
         }
 
@@ -235,6 +223,39 @@ namespace Application.Requests
                 Items = documentList,
                 TotalCount = paginationResult.TotalCount
             };
+        }
+
+        public async Task UpdateRequestItemStatus(UpdateRequestItemStatusInput input)
+        {
+            var item = await _documentRequestItemRepository.FirstOrDefault(x => x.Id == input.RequestItemId);
+            var documentRequest = await _requestRepository.GetByIdWithClient(item.DocumentRequestId);
+
+            if (item == null)
+            {
+                throw new Exception("Request item not found");
+            }
+            if (item.Status == RequestItemStatus.Approved)
+            {
+                throw new Exception("This item is already approved");
+            }
+            item.Status = input.Status;
+            if (item.Status == RequestItemStatus.Rejected)
+            {
+                if (string.IsNullOrEmpty(input.RejectReason))
+                {
+                    throw new Exception("Reject reason needed");
+                }
+                item.RejectReason = input.RejectReason;
+            }
+            _documentRequestItemRepository.Update(item);
+
+            if (!documentRequest.DocumentRequestItems.Any(x => x.Status != RequestItemStatus.Approved))
+            {
+                documentRequest.Status = RequestStatus.Completed;
+                _requestRepository.Update(documentRequest);
+            }
+
+            await _documentRequestItemRepository.SaveChanges();
         }
     }
 }

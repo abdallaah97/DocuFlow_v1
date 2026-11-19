@@ -4,6 +4,6 @@ namespace API.Models
     {
         public string Token { get; set; }
         public int ItemId { get; set; }
-        public List<IFormFile> Files { get; set; }
+        public IFormFile File { get; set; }
     }
 }

@@ -36,6 +36,7 @@ namespace Infrastructure.Repositories
                     (u =>
                         u.Name.ToLower().Trim().Contains(input.Search.ToLower().Trim()) ||
                         u.Email.ToLower().Trim().Contains(input.Search.ToLower().Trim()) ||
+                        u.Role.Name.ToLower().Trim().Contains(input.Search.ToLower().Trim()) ||
                         u.PhoneNumber.ToLower().Trim().Contains(input.Search.ToLower().Trim())
                     );
             }
